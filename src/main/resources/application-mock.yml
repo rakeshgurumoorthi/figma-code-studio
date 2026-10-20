@@ -1,0 +1,10 @@
+# Activated with --spring.profiles.active=mock (or SPRING_PROFILES_ACTIVE=mock).
+# Bitbucket and Figma are simulated and data lives in memory, so every screen can be tried offline.
+app:
+  mock-mode: true
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:figmacode;DB_CLOSE_DELAY=-1
+  thymeleaf:
+    cache: false

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Error')}"></head>
+<body class="auth-page">
+<main class="auth-shell">
+    <section class="auth-card">
+        <p class="eyebrow" th:text="${status}">404</p>
+        <h1 th:text="${status == 404} ? 'Not found' : 'Something went wrong'">Something went wrong</h1>
+        <p class="muted" th:text="${status == 404} ? 'That page or generation does not exist, or it belongs to someone else.' : 'The error has been logged. Try again, or go back to the dashboard.'">
+            The error has been logged.</p>
+        <p><a class="btn btn-primary" href="/">Back to dashboard</a></p>
+    </section>
+</main>
+</body>
+</html>

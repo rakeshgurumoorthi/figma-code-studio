@@ -1,0 +1,73 @@
+server:
+  port: ${PORT:8080}
+  # Honour X-Forwarded-* headers so the Figma redirect URI is right behind a load balancer
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      timeout: 8h
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
+
+spring:
+  application:
+    name: figma-code-studio
+  datasource:
+    # Defaults to a local H2 file. For PostgreSQL set DB_URL=jdbc:postgresql://host:5432/figmacode, DB_USER, DB_PASSWORD
+    url: ${DB_URL:jdbc:h2:file:./data/figmacode;AUTO_SERVER=TRUE}
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  thymeleaf:
+    cache: ${THYMELEAF_CACHE:true}
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 1h
+
+app:
+  mock-mode: ${MOCK_MODE:false}
+
+  bitbucket:
+    # Your Bitbucket Data Center URL, e.g. https://bitbucket.yourcompany.com
+    base-url: ${BITBUCKET_BASE_URL:}
+    connect-timeout: 5s
+    read-timeout: 10s
+
+  figma:
+    mcp-url: ${FIGMA_MCP_URL:https://mcp.figma.com/mcp}
+    client-languages: typescript,html,css
+    client-frameworks: react,tailwind
+    call-timeout: 90s
+    status-cache-ttl: 5m
+    oauth:
+      # ---------------------------------------------------------------
+      # Fill these in with the credentials Figma issued for your app.
+      # Prefer environment variables so the secret never lands in git.
+      # ---------------------------------------------------------------
+      client-id: ${FIGMA_CLIENT_ID:}
+      client-secret: ${FIGMA_CLIENT_SECRET:}
+      # Leave blank to discover from the MCP server's OAuth metadata
+      authorization-uri: ${FIGMA_AUTHORIZATION_URI:}
+      token-uri: ${FIGMA_TOKEN_URI:}
+      # Space separated; blank = what the server advertises
+      scopes: ${FIGMA_SCOPES:}
+      # Must exactly match the redirect URI registered with Figma; blank = {this host}/figma/callback
+      redirect-uri: ${FIGMA_REDIRECT_URI:}
+      # client_secret_basic or client_secret_post
+      client-auth-method: ${FIGMA_CLIENT_AUTH_METHOD:client_secret_basic}
+
+  security:
+    # 32 random bytes, base64. Generate with: openssl rand -base64 32
+    token-encryption-key: ${TOKEN_ENCRYPTION_KEY:}
+    max-failed-logins-per-window: 5
+    failed-login-window: 5m
+
+logging:
+  level:
+    com.figmacode: INFO

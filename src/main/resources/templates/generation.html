@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${generation.componentName})}"></head>
+<body class="workspace-page">
+<div th:replace="~{fragments/layout :: mockBanner}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<div class="workspace-bar">
+    <div class="workspace-title">
+        <a href="/" class="back-link" title="Back to dashboard">&larr;</a>
+        <div>
+            <h1 th:text="${generation.componentName}">Component</h1>
+            <a class="muted small mono" th:href="${generation.figmaUrl}" target="_blank" rel="noopener noreferrer"
+               th:text="${generation.fileKey} + ' · node ' + ${generation.nodeId}">file · node</a>
+        </div>
+        <span class="badge" id="save-state" th:text="${generation.edited} ? 'Edited' : 'From Figma'">From Figma</span>
+    </div>
+    <div class="workspace-actions">
+        <button class="btn btn-ghost btn-sm" type="button" id="btn-format">Format</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="btn-copy">Copy</button>
+        <form th:action="@{/generations/{id}/revert(id=${generation.id})}" method="post" class="inline-form"
+              onsubmit="return confirm('Discard your edits and restore the code from Figma?')">
+            <button class="btn btn-ghost btn-sm" type="submit">Revert</button>
+        </form>
+        <button class="btn btn-secondary btn-sm" type="button" id="btn-save">Save</button>
+        <a class="btn btn-primary btn-sm" id="btn-download"
+           th:href="@{/generations/{id}/download(id=${generation.id})}">Download project</a>
+        <form th:action="@{/generations/{id}/delete(id=${generation.id})}" method="post" class="inline-form"
+              onsubmit="return confirm('Delete this generation?')">
+            <button class="btn btn-ghost btn-sm btn-danger" type="submit" title="Delete">Delete</button>
+        </form>
+    </div>
+</div>
+
+<main class="workspace">
+    <section class="pane pane-editor">
+        <div class="tabs" role="tablist">
+            <button class="tab active" type="button" data-file="component" role="tab"
+                    th:text="${generation.componentName} + '.tsx'">Component.tsx</button>
+            <button class="tab" type="button" data-file="notes" role="tab"
+                    th:if="${generation.notes != null and !#strings.isEmpty(generation.notes)}">Figma notes</button>
+            <span class="tab-spacer"></span>
+            <span class="muted small" id="cursor-pos"></span>
+        </div>
+        <div id="editor" class="editor-host"></div>
+        <div class="assets-strip" th:unless="${#lists.isEmpty(assets)}">
+            <span class="muted small">Assets</span>
+            <a th:each="a : ${assets}" class="asset-chip" target="_blank"
+               th:href="@{/generations/{id}/assets/{f}(id=${generation.id}, f=${a.fileName})}">
+                <img th:src="@{/generations/{id}/assets/{f}(id=${generation.id}, f=${a.fileName})}" alt="">
+                <span th:text="${a.fileName}">img.png</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="pane pane-preview">
+        <div class="tabs" role="tablist">
+            <button class="tab active" type="button" data-view="preview" role="tab">Preview</button>
+            <button class="tab" type="button" data-view="figma" role="tab" th:if="${generation.hasScreenshot()}">Figma original</button>
+            <span class="tab-spacer"></span>
+            <span id="preview-status" class="preview-status"><span class="dot dot-pending"></span> Rendering</span>
+            <div class="segmented" role="group" aria-label="Viewport">
+                <button type="button" data-width="375" title="Mobile">375</button>
+                <button type="button" data-width="768" title="Tablet">768</button>
+                <button type="button" data-width="1280" title="Desktop">1280</button>
+                <button type="button" data-width="fill" class="active" title="Fit">Fit</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" type="button" id="btn-reload" title="Reload preview">Reload</button>
+        </div>
+        <div class="preview-stage" id="preview-stage">
+            <div class="preview-frame-wrap" id="preview-wrap">
+                <iframe id="preview-frame" title="Rendered preview" sandbox="allow-scripts"
+                        th:src="@{/preview/{id}(id=${generation.id})}"></iframe>
+            </div>
+            <div class="figma-original" id="figma-original" hidden th:if="${generation.hasScreenshot()}">
+                <img th:src="@{/generations/{id}/screenshot(id=${generation.id})}" alt="Figma screenshot of the frame">
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script th:inline="javascript">
+    window.__GENERATION__ = {
+        id: /*[[${generation.id}]]*/ "",
+        componentName: /*[[${generation.componentName}]]*/ "Component",
+        code: /*[[${generation.code}]]*/ "",
+        notes: /*[[${generation.notes}]]*/ ""
+    };
+</script>
+<script src="/webjars/monaco-editor/min/vs/loader.js"></script>
+<script src="/js/workspace.js"></script>
+</body>
+</html>

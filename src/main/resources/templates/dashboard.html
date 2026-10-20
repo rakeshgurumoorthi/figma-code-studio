@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: mockBanner}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="page-head">
+        <h1>Design to code</h1>
+        <p class="muted">Connect Figma, paste a frame link, and get React + Tailwind code with a live preview.</p>
+    </div>
+
+    <div class="grid-2">
+        <section class="card" aria-labelledby="figma-heading">
+            <div class="card-head">
+                <h2 id="figma-heading">1. Figma connection</h2>
+                <button class="btn btn-ghost btn-sm" type="button"
+                        hx-get="/figma/status?refresh=true" hx-target="#figma-status" hx-swap="innerHTML"
+                        hx-indicator="#figma-status">Check again</button>
+            </div>
+            <div id="figma-status" hx-get="/figma/status" hx-trigger="load, every 60s" hx-swap="innerHTML">
+                <div class="status-row">
+                    <span class="dot dot-pending"></span>
+                    <div><strong>Checking Figma MCP…</strong>
+                        <p class="muted small">Talking to the remote MCP server.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card" aria-labelledby="link-heading">
+            <div class="card-head">
+                <h2 id="link-heading">2. Generate from a Figma link</h2>
+            </div>
+            <form th:action="@{/generations}" method="post" id="generate-form" class="stack">
+                <label class="field">
+                    <span>Figma frame link</span>
+                    <input type="url" name="figmaUrl" id="figma-url" required disabled
+                           placeholder="https://www.figma.com/design/AbC123/My-file?node-id=12-345"
+                           th:value="${figmaUrl}">
+                </label>
+                <p class="muted small">In Figma, select a frame, right-click, then Copy/Paste as › Copy link to selection.</p>
+                <button type="submit" class="btn btn-primary" id="generate-submit" disabled>
+                    <span class="btn-label">Get code</span>
+                    <span class="spinner" aria-hidden="true"></span>
+                </button>
+                <p class="muted small" id="generate-hint">Connect Figma first.</p>
+                <p class="muted small" th:if="${mockMode}">Mock mode: any figma.com/design link with a node-id works; node-id <code>0-0</code> shows the error case.</p>
+            </form>
+        </section>
+    </div>
+
+    <section class="card" aria-labelledby="history-heading">
+        <div class="card-head">
+            <h2 id="history-heading">Recent generations</h2>
+        </div>
+        <p class="muted" th:if="${#lists.isEmpty(history)}">Nothing generated yet.</p>
+        <table class="table" th:unless="${#lists.isEmpty(history)}">
+            <thead>
+            <tr><th>Component</th><th>Figma node</th><th>Created</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="g : ${history}">
+                <td>
+                    <a th:href="@{/generations/{id}(id=${g.id})}" th:text="${g.componentName}">Card</a>
+                    <span class="badge" th:if="${g.edited}">edited</span>
+                </td>
+                <td class="mono small" th:text="${g.fileKey} + ' · ' + ${g.nodeId}">abc · 1:2</td>
+                <td class="small" th:text="${#temporals.format(g.createdAt.atZone(T(java.time.ZoneId).systemDefault()), 'dd MMM yyyy, HH:mm')}">now</td>
+                <td class="right">
+                    <a class="btn btn-ghost btn-sm" th:href="@{/generations/{id}/download(id=${g.id})}">Download</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+    (function () {
+        var form = document.getElementById("generate-form");
+        var input = document.getElementById("figma-url");
+        var button = document.getElementById("generate-submit");
+        var hint = document.getElementById("generate-hint");
+
+        function sync() {
+            var card = document.querySelector("#figma-status [data-connected]");
+            var connected = card && card.getAttribute("data-connected") === "true";
+            input.disabled = !connected;
+            button.disabled = !connected;
+            hint.style.display = connected ? "none" : "";
+        }
+        document.body.addEventListener("htmx:afterSwap", sync);
+        form.addEventListener("submit", function () {
+            button.classList.add("loading");
+            button.querySelector(".btn-label").textContent = "Asking Figma…";
+            setTimeout(function () { button.disabled = true; input.readOnly = true; }, 0);
+        });
+    })();
+</script>
+</body>
+</html>

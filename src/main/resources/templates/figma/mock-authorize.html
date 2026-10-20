@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Allow access')}"></head>
+<body class="auth-page">
+<div th:replace="~{fragments/layout :: mockBanner}"></div>
+<main class="auth-shell">
+    <section class="auth-card">
+        <p class="eyebrow">Simulated Figma consent screen</p>
+        <h1>Allow Figma Code Studio to access your Figma account?</h1>
+        <p class="muted">In the real app this page is hosted by Figma. The app will be able to read the designs
+            you have access to through Figma's MCP server.</p>
+        <ul class="check-list">
+            <li>Read file contents and generate code for frames</li>
+            <li>Take screenshots of frames</li>
+        </ul>
+        <div class="row gap">
+            <a class="btn btn-primary" id="mock-allow"
+               th:href="${redirectUri} + '?code=mock-code&state=' + ${#uris.escapeQueryParam(state)}">Allow access</a>
+            <a class="btn btn-ghost" id="mock-deny"
+               th:href="${redirectUri} + '?error=access_denied&error_description=You+denied+access&state=' + ${#uris.escapeQueryParam(state)}">Deny</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

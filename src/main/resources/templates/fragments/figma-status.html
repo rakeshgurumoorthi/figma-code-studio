@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="card" th:attr="data-connected=${status.connected()}" class="status-card">
+    <th:block th:switch="${status.state().name()}">
+
+        <div th:case="'CONNECTED'" class="status-row">
+            <span class="dot dot-ok"></span>
+            <div>
+                <strong>Connected to Figma MCP</strong>
+                <p class="muted small" th:if="${status.account() != null}">
+                    Signed in as <span th:text="${status.account()}">me@example.com</span>
+                </p>
+                <p class="muted small">
+                    <span th:text="${#lists.size(status.tools())}">5</span> tools available, including
+                    <code>get_design_context</code>.
+                    Checked <span th:text="${#temporals.format(status.checkedAt().atZone(T(java.time.ZoneId).systemDefault()), 'HH:mm:ss')}">now</span>.
+                </p>
+                <details class="small">
+                    <summary>Show tools</summary>
+                    <ul class="tool-list"><li th:each="t : ${status.tools()}"><code th:text="${t}">tool</code></li></ul>
+                </details>
+                <form th:action="@{/figma/disconnect}" method="post" class="inline-form">
+                    <button type="submit" class="btn btn-ghost btn-sm">Disconnect</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:case="'NOT_CONNECTED'" class="status-row">
+            <span class="dot dot-off"></span>
+            <div>
+                <strong>Figma is not connected</strong>
+                <p class="muted small" th:text="${status.message()}">Connect your Figma account.</p>
+                <a class="btn btn-primary btn-sm" href="/figma/connect">Connect Figma</a>
+            </div>
+        </div>
+
+        <div th:case="'EXPIRED'" class="status-row">
+            <span class="dot dot-warn"></span>
+            <div>
+                <strong>Figma connection expired</strong>
+                <p class="muted small" th:text="${status.message()}">Reconnect.</p>
+                <a class="btn btn-primary btn-sm" href="/figma/connect">Reconnect Figma</a>
+            </div>
+        </div>
+
+        <div th:case="'TOOL_MISSING'" class="status-row">
+            <span class="dot dot-warn"></span>
+            <div>
+                <strong>Connected, but code generation is unavailable</strong>
+                <p class="muted small" th:text="${status.message()}">Missing tool.</p>
+                <p class="muted small">Tools offered: <span th:text="${#strings.listJoin(status.tools(), ', ')}">x</span></p>
+            </div>
+        </div>
+
+        <div th:case="*" class="status-row">
+            <span class="dot dot-error"></span>
+            <div>
+                <strong>Figma MCP unreachable</strong>
+                <p class="muted small" th:text="${status.message()}">Timeout.</p>
+            </div>
+        </div>
+
+    </th:block>
+</div>
+</body>
+</html>

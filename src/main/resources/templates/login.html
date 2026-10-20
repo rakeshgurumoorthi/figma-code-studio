@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign in')}"></head>
+<body class="auth-page">
+<div th:replace="~{fragments/layout :: mockBanner}"></div>
+<main class="auth-shell">
+    <section class="auth-card">
+        <div class="auth-brand">
+            <img src="/images/logo.svg" alt="" width="40" height="40">
+            <div>
+                <h1>Figma Code Studio</h1>
+                <p class="muted">Turn Figma frames into React code you can run.</p>
+            </div>
+        </div>
+
+        <div class="alert alert-error" th:if="${loginError != null}" th:text="${loginError}">Wrong password</div>
+        <div class="alert alert-info" th:if="${param.logout != null}">You have signed out.</div>
+
+        <form th:action="@{/login}" method="post" class="stack" id="login-form">
+            <label class="field">
+                <span>Bitbucket username</span>
+                <input type="text" name="username" autocomplete="username" required autofocus
+                       th:value="${lastUsername}">
+            </label>
+            <label class="field">
+                <span>Password</span>
+                <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <button type="submit" class="btn btn-primary btn-block" id="login-submit">
+                <span class="btn-label">Sign in with Bitbucket</span>
+                <span class="spinner" aria-hidden="true"></span>
+            </button>
+        </form>
+        <p class="muted small center">Your password is checked by Bitbucket Data Center and never stored here.</p>
+
+        <div class="mock-hints" th:if="${mockMode}">
+            <strong>Mock sign-in</strong>
+            <ul>
+                <li>Any username with any password signs in.</li>
+                <li>Password <code>wrong</code> shows the bad-password error.</li>
+                <li>Username <code>captcha</code> or <code>offline</code> shows those errors.</li>
+            </ul>
+        </div>
+    </section>
+</main>
+<script>
+    document.getElementById("login-form").addEventListener("submit", function () {
+        document.getElementById("login-submit").classList.add("loading");
+    });
+</script>
+</body>
+</html>

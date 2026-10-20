@@ -1,0 +1,14 @@
+# Copy to application-local.yml (git-ignored) and run with --spring.profiles.active=local
+# Environment variables work too; see README.
+
+app:
+  bitbucket:
+    base-url: https://bitbucket.yourcompany.com
+  figma:
+    oauth:
+      client-id: PASTE_FIGMA_CLIENT_ID_HERE
+      client-secret: PASTE_FIGMA_CLIENT_SECRET_HERE
+      # Must match the redirect URI registered with Figma exactly
+      redirect-uri: https://figma-code-studio.yourcompany.com/figma/callback
+  security:
+    token-encryption-key: PASTE_OUTPUT_OF_openssl_rand_-base64_32

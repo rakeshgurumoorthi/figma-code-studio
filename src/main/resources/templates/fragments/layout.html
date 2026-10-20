@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <title th:text="${title} + ' · Figma Code Studio'">Figma Code Studio</title>
+    <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/webjars/htmx.org/dist/htmx.min.js" defer></script>
+</head>
+<body>
+
+<div th:fragment="mockBanner" th:if="${mockMode}" class="mock-banner">
+    Mock mode: Bitbucket and Figma are simulated. Nothing leaves this machine.
+</div>
+
+<header th:fragment="header" class="topbar">
+    <a class="brand" href="/">
+        <img src="/images/logo.svg" alt="" width="28" height="28">
+        <span>Figma Code Studio</span>
+    </a>
+    <div class="topbar-right" th:if="${currentUser != null}">
+        <span class="user-chip" th:title="${currentUser.email}">
+            <span class="avatar" th:text="${#strings.substring(currentUser.displayName, 0, 1)}">R</span>
+            <span th:text="${currentUser.displayName}">Rakesh</span>
+        </span>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn-ghost btn-sm">Sign out</button>
+        </form>
+    </div>
+</header>
+
+<div th:fragment="flash">
+    <div class="alert alert-error" th:if="${error != null}" th:text="${error}">Error</div>
+    <div class="alert alert-success" th:if="${success != null}" th:text="${success}">Success</div>
+</div>
+
+</body>
+</html>
